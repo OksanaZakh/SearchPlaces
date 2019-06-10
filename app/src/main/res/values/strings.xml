@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">Place Search</string>
     <string name="hint">Search the place</string>
+    <string name="entertainment">Entertainments</string>
+    <string name="art">Art</string>
+    <string name="cafes_and_restorants">Cafes and Restorants</string>
+    <string name="sightseeing">Sightseeing</string>
+    <string name="educational">Educational</string>
+    <string name="events">Events</string>
+    <string name="government">Government buildings</string>
+    <string name="medical">Medical</string>
+    <string name="shopping">Shopping</string>
+    <string name="public_transport">Public transport</string>
 </resources>

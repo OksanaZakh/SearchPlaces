@@ -9,6 +9,7 @@ interface APIService {
     fun getNearByPlaces(
         @Query("||") coordinates: String,
         @Query("radius") radius: Int,
-        @Query("limit") limit: Int
+        @Query("limit") limit: Int,
+        @Query("categoryId") category: String
     )
 }
