@@ -9,6 +9,6 @@
     <string name="events">Events</string>
     <string name="government">Government buildings</string>
     <string name="medical">Medical</string>
-    <string name="shopping">Shopping</string>
+    <string name="shopping">Shopping and services</string>
     <string name="public_transport">Public transport</string>
 </resources>
