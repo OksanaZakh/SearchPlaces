@@ -4,12 +4,21 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.widget.SearchView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.ozakharchenko.placesearch.model.PlaceItem
+import com.ozakharchenko.placesearch.utils.SearchCategory
+import com.ozakharchenko.placesearch.viewmodel.PlacesViewModel
+import com.ozakharchenko.placesearch.viewmodel.Resource
 
 class SearchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+        val model = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
+        model.getPlaces("", SearchCategory.SHOPPING).observe(this, Observer<Resource<List<PlaceItem>>> {
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

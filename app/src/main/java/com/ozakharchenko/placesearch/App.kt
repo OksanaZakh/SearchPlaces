@@ -1,4 +1,7 @@
 package com.ozakharchenko.placesearch
 
-class App {
+import android.app.Application
+
+object App : Application() {
+
 }

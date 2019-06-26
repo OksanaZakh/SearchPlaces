@@ -1,7 +1,5 @@
 package com.ozakharchenko.placesearch.model
 
-import com.ozakharchenko.placesearch.api.Category
-
 data class PlaceItem(
     var name: String,
     var address: String?,
@@ -10,5 +8,5 @@ data class PlaceItem(
     var distance: Int?,
     var categoryName: String?,
     var imageUrl: String,
-    var isFavourite: Boolean
+    var isFavourite: Boolean = false
 )

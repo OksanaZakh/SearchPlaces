@@ -8,9 +8,11 @@ import retrofit2.http.Query
 interface APIService {
     @GET(URL)
     fun getNearByPlaces(
+        @Query("categoryId") category: String,
         @Query("||") coordinates: String,
+        @Query("query") query: String,
         @Query("radius") radius: Int,
-        @Query("limit") limit: Int,
-        @Query("categoryId") category: String
+        @Query("limit") limit: Int
+
     ): Call<BaseResponse>
 }

@@ -1,25 +1,13 @@
 package com.ozakharchenko.placesearch.api
 
-data class BaseResponse(var response: Response?) {
-    constructor() : this(null)
-}
+data class BaseResponse(var response: Response? = null)
 
-data class Response(var venues: List<Venue>?) {
-    constructor() : this(null)
-}
+data class Response(var venues: List<Venue>? = null)
 
-data class Venue(var name: String, var location: Location?, var categories: List<Category>?) {
-    constructor() : this("", null, null)
-}
+data class Venue(var name: String = "", var location: Location? = null, var categories: List<Category>? = null)
 
-data class Location(var address: String, var lat: Double, var lng: Double, var distance: Int) {
-    constructor() : this("", 0.0, 0.0, 0)
-}
+data class Location(var address: String = "", var lat: Double = 0.0, var lng: Double = 0.0, var distance: Int = 0)
 
-data class Category(var name: String, var icon: Icon?) {
-    constructor() : this("", null)
-}
+data class Category(var name: String = "", var icon: Icon? = null)
 
-data class Icon(var prefix: String, var suffix: String) {
-    constructor() : this("", "")
-}
+data class Icon(var prefix: String = "", var suffix: String = "")

@@ -16,7 +16,9 @@
 
             <LinearLayout style="@style/CategoryHorisontalContainerLayoutStyle">
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/entertainment">
 
                     <ImageButton
                             android:id="@+id/imageButton3"
@@ -29,7 +31,9 @@
                             android:text="@string/entertainment"/>
                 </LinearLayout>
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/art">
 
                     <ImageButton
                             android:id="@+id/imageButton4"
@@ -45,7 +49,9 @@
 
             <LinearLayout style="@style/CategoryHorisontalContainerLayoutStyle">
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/cafes_and_restorants">
 
                     <ImageButton
                             android:id="@+id/imageButton5"
@@ -58,7 +64,9 @@
                             android:text="@string/cafes_and_restorants"/>
                 </LinearLayout>
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/sightseeing">
 
                     <ImageButton
                             android:id="@+id/imageButton6"
@@ -74,7 +82,9 @@
 
             <LinearLayout style="@style/CategoryHorisontalContainerLayoutStyle">
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/educational">
 
                     <ImageButton
                             android:id="@+id/imageButton7"
@@ -87,7 +97,9 @@
                             android:text="@string/educational"/>
                 </LinearLayout>
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/events">
 
                     <ImageButton
                             android:id="@+id/imageButton8"
@@ -103,7 +115,9 @@
 
             <LinearLayout style="@style/CategoryHorisontalContainerLayoutStyle">
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/government">
 
                     <ImageButton
                             android:id="@+id/imageButton9"
@@ -119,7 +133,9 @@
                             android:text="@string/government"/>
                 </LinearLayout>
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/medical">
 
                     <ImageButton
                             android:id="@+id/imageButton10"
@@ -138,7 +154,9 @@
 
             <LinearLayout style="@style/CategoryHorisontalContainerLayoutStyle">
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/shopping">
 
                     <ImageButton
                             android:id="@+id/imageButton11"
@@ -154,7 +172,9 @@
                             android:text="@string/shopping"/>
                 </LinearLayout>
 
-                <LinearLayout style="@style/CategoryLayoutStyle">
+                <LinearLayout style="@style/CategoryLayoutStyle"
+                              android:onClick="goToCategory"
+                              android:tag="@string/public_transport">
 
                     <ImageButton
                             android:id="@+id/imageButton12"
