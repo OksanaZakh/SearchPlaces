@@ -1,6 +1,8 @@
 package com.ozakharchenko.placesearch.utils
 
-const val BASE_URL = "https://api.foursquare.com/"
-const val URL = "v2/venues/search?client_id=NXG4MWMFSIYL3ZQB3NZJF1PDE2ASZYHHWDLC32UZVCMLJCDT" +
-        "&client_secret=XZQ3PO41AV4OSAE2TXGWXHWKRUNN5TR4YDZHGADFTRWSTKKC&v=20190606"
+const val BASE_URL = "https://api.foursquare.com"
+const val URL = "/v2/venues/search"
+const val API_CLIENT_ID = "NXG4MWMFSIYL3ZQB3NZJF1PDE2ASZYHHWDLC32UZVCMLJCDT"
+const val API_CLIENT_SECRET = "XZQ3PO41AV4OSAE2TXGWXHWKRUNN5TR4YDZHGADFTRWSTKKC"
+const val API_CLIENT_VERSION = "20190703"
 const val CATEGORY = "Category"

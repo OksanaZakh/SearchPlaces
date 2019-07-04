@@ -11,4 +11,5 @@
     <string name="medical">Medical</string>
     <string name="shopping">Shopping and services</string>
     <string name="public_transport">Public transport</string>
+    <string name="download_error">Something goes wrong, please check internet connection or try later!</string>
 </resources>

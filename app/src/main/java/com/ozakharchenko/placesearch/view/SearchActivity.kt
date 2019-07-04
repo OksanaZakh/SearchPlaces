@@ -2,10 +2,16 @@ package com.ozakharchenko.placesearch.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.model.PlaceItem
 import com.ozakharchenko.placesearch.utils.CATEGORY
@@ -15,29 +21,77 @@ import com.ozakharchenko.placesearch.viewmodel.Resource
 
 class SearchActivity : AppCompatActivity() {
 
+    val TAG = "Search Activity"
+    private var places: List<PlaceItem> = ArrayList()
+    private lateinit var progressBar: ProgressBar
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var placesViewModel: PlacesViewModel
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-        val model = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
-        model.getPlaces("", getCategory()).observe(this, Observer<Resource<List<PlaceItem>>> {
+
+        setupView()
+        setupRecycler()
+        setupViewModel()
+    }
+
+    private fun setupViewModel() {
+        placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
+        placesViewModel.category = getCategory()
+        placesViewModel.getPlaces().observe(this, Observer { it ->
+            Log.e(TAG, "Adding observer in search activity")
+            when (it.status) {
+                Resource.Status.SUCCESS -> {
+                    progressBar.visibility = View.GONE
+                    when {
+                        it.data == null || it.data.isEmpty() -> showErrorToast()
+                        else -> {
+                            places = it.data
+                            recyclerView.adapter?.notifyDataSetChanged()
+                        }
+
+                    }
+                }
+                Resource.Status.LOADING -> {
+                    Log.e(TAG, "Adding observer in search activity LOADING")
+                    progressBar.visibility = View.VISIBLE
+                }
+                Resource.Status.ERROR -> {
+                    progressBar.visibility = View.GONE
+                    showErrorToast()
+                }
+            }
         })
+    }
+
+    private fun setupRecycler() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = SearchAdapter(places)
+    }
+
+    private fun setupView() {
+        recyclerView = findViewById(R.id.rvList)
+        progressBar = findViewById(R.id.progressBar)
     }
 
     private fun getCategory(): SearchCategory {
         val category: SearchCategory by lazy {
             when (intent.getStringExtra(CATEGORY)) {
                 getString(R.string.entertainment) -> SearchCategory.ENTERTAINMENT
-                getString(R.string.art)-> SearchCategory.ART
+                getString(R.string.art) -> SearchCategory.ART
                 getString(R.string.cafes_and_restaurants) -> SearchCategory.FOOD
                 getString(R.string.sightseeing) -> SearchCategory.SIGHTSEEING
                 getString(R.string.educational) -> SearchCategory.EDUCATIONAL
                 getString(R.string.events) -> SearchCategory.EVENTS
                 getString(R.string.government) -> SearchCategory.GOVERNMENT
                 getString(R.string.medical) -> SearchCategory.MEDICAL
-                getString(R.string.public_transport) ->SearchCategory.TRANSPORT
+                getString(R.string.public_transport) -> SearchCategory.TRANSPORT
                 else -> SearchCategory.SHOPPING
             }
         }
+        Log.e(TAG, "category is ${category.name}")
         return category
     }
 
@@ -56,4 +110,11 @@ class SearchActivity : AppCompatActivity() {
         })
         return super.onCreateOptionsMenu(menu)
     }
+
+    override fun onResume() {
+        super.onResume()
+        //TODO implement receiving the last call from live data
+    }
+
+    private fun showErrorToast() = Toast.makeText(this, R.string.download_error, Toast.LENGTH_LONG).show()
 }
