@@ -1,4 +1,4 @@
-package com.ozakharchenko.placesearch.view
+package com.ozakharchenko.placesearch.ui.search
 
 interface OnItemClickListener {
     fun onItemClick(item: Int)

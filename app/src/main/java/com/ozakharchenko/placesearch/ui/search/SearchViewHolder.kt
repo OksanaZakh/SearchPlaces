@@ -1,4 +1,4 @@
-package com.ozakharchenko.placesearch.view
+package com.ozakharchenko.placesearch.ui.search
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

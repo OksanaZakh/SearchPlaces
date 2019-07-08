@@ -1,6 +1,6 @@
 package com.ozakharchenko.placesearch.utils
 
-enum class SearchCategory(val category: String){
+enum class SearchCategory(var category: String){
     ENTERTAINMENT("4bf58dd8d48988d17c941735,52e81612bcbc57f1066b79e7,4bf58dd8d48988d18e941735,5032792091d4c4b30a586d5c,52e81612bcbc57f1066b79ef," +
             "4bf58dd8d48988d1f1931735,52e81612bcbc57f1066b79ea,4bf58dd8d48988d17f941735,4bf58dd8d48988d1e5931735,4bf58dd8d48988d193941735,4bf58dd8d48988d17b941735," +
             "4d4b7105d754a06376d81259,4d4b7105d754a06377d81259,4eb1daf44b900d56c88a4600"),

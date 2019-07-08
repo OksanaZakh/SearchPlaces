@@ -1,8 +1,7 @@
-package com.ozakharchenko.placesearch.view
+package com.ozakharchenko.placesearch.ui.search
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
@@ -21,12 +20,11 @@ import com.ozakharchenko.placesearch.viewmodel.Resource
 
 class SearchActivity : AppCompatActivity() {
 
-    val TAG = "Search Activity"
     private var places: List<PlaceItem> = ArrayList()
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
     private lateinit var placesViewModel: PlacesViewModel
-
+    private lateinit var searchAdapter: SearchAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +37,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupViewModel() {
         placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
-        placesViewModel.category = getCategory()
-        placesViewModel.getPlaces().observe(this, Observer { it ->
-            Log.e(TAG, "Adding observer in search activity")
+        placesViewModel.getPlaces(getCategory()).observe(this, Observer {
             when (it.status) {
                 Resource.Status.SUCCESS -> {
                     progressBar.visibility = View.GONE
@@ -49,13 +45,12 @@ class SearchActivity : AppCompatActivity() {
                         it.data == null || it.data.isEmpty() -> showErrorToast()
                         else -> {
                             places = it.data
-                            recyclerView.adapter?.notifyDataSetChanged()
+                            searchAdapter.places = it.data
                         }
 
                     }
                 }
                 Resource.Status.LOADING -> {
-                    Log.e(TAG, "Adding observer in search activity LOADING")
                     progressBar.visibility = View.VISIBLE
                 }
                 Resource.Status.ERROR -> {
@@ -68,7 +63,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupRecycler() {
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = SearchAdapter(places)
+        searchAdapter = SearchAdapter()
+        recyclerView.adapter = searchAdapter
     }
 
     private fun setupView() {
@@ -91,7 +87,6 @@ class SearchActivity : AppCompatActivity() {
                 else -> SearchCategory.SHOPPING
             }
         }
-        Log.e(TAG, "category is ${category.name}")
         return category
     }
 
@@ -109,11 +104,6 @@ class SearchActivity : AppCompatActivity() {
             }
         })
         return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //TODO implement receiving the last call from live data
     }
 
     private fun showErrorToast() = Toast.makeText(this, R.string.download_error, Toast.LENGTH_LONG).show()

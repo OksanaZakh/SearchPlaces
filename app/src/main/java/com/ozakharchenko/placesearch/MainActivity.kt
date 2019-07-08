@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import com.ozakharchenko.placesearch.utils.CATEGORY
 import com.ozakharchenko.placesearch.utils.CategoryCustomLayout
-import com.ozakharchenko.placesearch.view.SearchActivity
+import com.ozakharchenko.placesearch.ui.search.SearchActivity
 
 class MainActivity : AppCompatActivity() {
 
