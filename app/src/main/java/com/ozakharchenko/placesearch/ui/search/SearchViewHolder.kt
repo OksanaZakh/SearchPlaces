@@ -8,6 +8,7 @@ class SearchViewHolder(view: View): RecyclerView.ViewHolder(view) {
     val tvName = view.tvName
     val tvCategory = view.tvCategory
     val tvDistance = view.tvDistance
+    val tvAddress = view.tvAddress
     val tvIcon = view.ivIcon
     val ivStar = view.ivStar
 }

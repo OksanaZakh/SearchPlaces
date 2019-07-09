@@ -47,7 +47,6 @@ class SearchActivity : AppCompatActivity() {
                             places = it.data
                             searchAdapter.places = it.data
                         }
-
                     }
                 }
                 Resource.Status.LOADING -> {
@@ -70,6 +69,12 @@ class SearchActivity : AppCompatActivity() {
     private fun setupView() {
         recyclerView = findViewById(R.id.rvList)
         progressBar = findViewById(R.id.progressBar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 
     private fun getCategory(): SearchCategory {
