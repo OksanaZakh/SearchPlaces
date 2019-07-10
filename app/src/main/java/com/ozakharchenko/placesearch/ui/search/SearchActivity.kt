@@ -2,6 +2,7 @@ package com.ozakharchenko.placesearch.ui.search
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
@@ -13,12 +14,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.model.PlaceItem
+import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
+import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
 import com.ozakharchenko.placesearch.utils.CATEGORY
 import com.ozakharchenko.placesearch.utils.SearchCategory
 import com.ozakharchenko.placesearch.viewmodel.PlacesViewModel
 import com.ozakharchenko.placesearch.viewmodel.Resource
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavouriteListener {
+
+    val TAG = "SEARCH ACTIVITY"
 
     private var places: List<PlaceItem> = ArrayList()
     private lateinit var progressBar: ProgressBar
@@ -45,7 +50,7 @@ class SearchActivity : AppCompatActivity() {
                         it.data == null || it.data.isEmpty() -> showErrorToast()
                         else -> {
                             places = it.data
-                            searchAdapter.places = it.data
+                            searchAdapter.setPlaces(it.data)
                         }
                     }
                 }
@@ -64,6 +69,8 @@ class SearchActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         searchAdapter = SearchAdapter()
         recyclerView.adapter = searchAdapter
+        searchAdapter.setItemClickListener(this)
+        searchAdapter.setAddToFavouriteListener(this)
     }
 
     private fun setupView() {
@@ -109,6 +116,16 @@ class SearchActivity : AppCompatActivity() {
             }
         })
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onItemClick(itemPosition: Int) {
+       //TODO (go to detailed activity)
+        Log.e(TAG, "Item clicked $itemPosition")
+    }
+
+    override fun onAddToFavourite(itemPosition: Int) {
+        //TODO (add to DB)
+        Log.e(TAG, "Item added to db $itemPosition")
     }
 
     private fun showErrorToast() = Toast.makeText(this, R.string.download_error, Toast.LENGTH_LONG).show()

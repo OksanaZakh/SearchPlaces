@@ -103,7 +103,7 @@
             android:layout_weight="1"
             android:paddingTop="8dp"
             android:paddingEnd="8dp"
-            app:srcCompat="@android:drawable/btn_star" />
+            app:srcCompat="@android:drawable/btn_star_big_off" />
 
     </LinearLayout>
 
