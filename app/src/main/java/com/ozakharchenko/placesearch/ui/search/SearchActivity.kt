@@ -42,7 +42,11 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
 
     private fun setupViewModel() {
         placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
-        placesViewModel.getPlaces(getCategory()).observe(this, Observer {
+        getData()
+    }
+
+    private fun getData(query: String = ""){
+        placesViewModel.getPlaces(category = getCategory(), query = query).observe(this, Observer {
             when (it.status) {
                 Resource.Status.SUCCESS -> {
                     progressBar.visibility = View.GONE
@@ -77,6 +81,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         recyclerView = findViewById(R.id.rvList)
         progressBar = findViewById(R.id.progressBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = intent.getStringExtra(CATEGORY)
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -108,11 +113,13 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         val searchView = searchItem?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                getData(query?.toLowerCase()?:"")
+                return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                getData(newText?.toLowerCase()?:"")
+                return true
             }
         })
         return super.onCreateOptionsMenu(menu)
