@@ -1,8 +1,6 @@
 package com.ozakharchenko.placesearch.viewmodel
 
-import com.ozakharchenko.placesearch.utils.DownloadException
-
-class Resource<T> private constructor(var status: Status= Status.LOADING, val data: T?, val exception: DownloadException?) {
+class Resource<T> private constructor(var status: Status= Status.LOADING, val data: T?, val message: String?) {
     enum class Status {
         SUCCESS, ERROR, LOADING
     }
@@ -13,8 +11,8 @@ class Resource<T> private constructor(var status: Status= Status.LOADING, val da
             return Resource(Status.SUCCESS, data, null)
         }
 
-        fun <T> error(exception: DownloadException?): Resource<T> {
-            return Resource(Status.ERROR, null, exception)
+        fun <T> error(message: String?, data: T?): Resource<T> {
+            return Resource(Status.ERROR, data, message)
         }
 
         fun <T> loading(data: T?): Resource<T> {
