@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ozakharchenko.placesearch.R
-import com.ozakharchenko.placesearch.model.PlaceItem
+import com.ozakharchenko.placesearch.repository.PlaceItem
 import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
 import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
 import com.ozakharchenko.placesearch.utils.CATEGORY

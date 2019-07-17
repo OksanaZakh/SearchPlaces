@@ -1,4 +1,4 @@
-package com.ozakharchenko.placesearch.model
+package com.ozakharchenko.placesearch.repository
 
 data class PlaceItem(
         var id: String,

@@ -13,6 +13,7 @@
         <item name="android:layout_weight">1</item>
         <item name="android:background">@drawable/ic_border</item>
         <item name="android:layout_margin">3dp</item>
+        <item name="android:paddingBottom">7dp</item>
         <item name="android:orientation">vertical</item>
         <item name="android:clickable">true</item>
     </style>

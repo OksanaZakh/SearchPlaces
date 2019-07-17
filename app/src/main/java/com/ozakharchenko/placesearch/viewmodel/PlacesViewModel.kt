@@ -1,12 +1,11 @@
 package com.ozakharchenko.placesearch.viewmodel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import com.ozakharchenko.placesearch.api.MetaResponse
-import com.ozakharchenko.placesearch.api.Venue
-import com.ozakharchenko.placesearch.model.PlaceItem
-import com.ozakharchenko.placesearch.repository.PlacesRepository
+import com.ozakharchenko.placesearch.AppExecutors
+import com.ozakharchenko.placesearch.repository.PlaceItem
+import com.ozakharchenko.placesearch.repository.PlacesRepo
+import com.ozakharchenko.placesearch.usecases.GetPlacesList
 import com.ozakharchenko.placesearch.utils.COORDINATE_KYIV_CENTER
 import com.ozakharchenko.placesearch.utils.SearchCategory
 
@@ -19,35 +18,7 @@ class PlacesViewModel : ViewModel() {
             radius: Int = 10_000,
             limit: Int = 50
     ): LiveData<Resource<List<PlaceItem>>> {
-        val inputLiveData: LiveData<Resource<MetaResponse>> =
-                PlacesRepository.getPlacesFromAPI(category, coordinates, query, radius, limit)
-        return Transformations.map(inputLiveData) { input -> getTransformedValues(input) }
-    }
-
-    private fun getTransformedValues(inputLiveData: Resource<MetaResponse>): Resource<List<PlaceItem>> {
-        when (inputLiveData.status) {
-            Resource.Status.LOADING -> {
-                return Resource.loading(null)
-            }
-            Resource.Status.ERROR -> {
-                return Resource.error(null, null)
-            }
-            Resource.Status.SUCCESS -> {
-                val places = ArrayList<PlaceItem>()
-                inputLiveData.data?.response?.venues?.forEach {
-                    places.add(
-                            PlaceItem(
-                                    it.id, it.name, it.location?.formattedAddress?.joinToString(), it.location?.lat, it.location?.lng,
-                                    it.location?.distance, it.categories?.get(0)?.name, parseUrl(it) ?: ""
-                            )
-                    )
-                }
-                return Resource.success(places)
-            }
-        }
-    }
-
-    private fun parseUrl(venue: Venue): String? {
-        return venue.categories?.firstOrNull()?.let { it.icon?.prefix + 100 + it.icon?.suffix }
+        val useCase = GetPlacesList(AppExecutors, PlacesRepo(), category, coordinates, query, radius, limit)
+        return useCase.getPlacesDataWithFavourites()
     }
 }

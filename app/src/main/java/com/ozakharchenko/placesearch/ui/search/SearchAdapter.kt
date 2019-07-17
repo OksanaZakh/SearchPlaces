@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.ozakharchenko.placesearch.model.PlaceItem
+import com.ozakharchenko.placesearch.repository.PlaceItem
 import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
 import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
 import org.jetbrains.annotations.NotNull

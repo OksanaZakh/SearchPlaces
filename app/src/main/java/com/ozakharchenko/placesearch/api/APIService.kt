@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface APIClient {
+interface APIService {
     @GET(SEARCH_FOR_VENUES_URL)
     fun getNearByPlaces(@Query("categoryId") category: String,
                         @Query("ll") coordinates: String,
