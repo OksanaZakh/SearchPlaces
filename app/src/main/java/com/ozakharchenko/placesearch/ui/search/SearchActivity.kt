@@ -17,6 +17,8 @@ import com.ozakharchenko.placesearch.repository.PlaceItem
 import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
 import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
 import com.ozakharchenko.placesearch.utils.CATEGORY
+import com.ozakharchenko.placesearch.utils.LOCATION
+import com.ozakharchenko.placesearch.utils.LOCATION_KYIV_CENTER
 import com.ozakharchenko.placesearch.utils.SearchCategory
 import com.ozakharchenko.placesearch.viewmodel.PlacesViewModel
 import com.ozakharchenko.placesearch.viewmodel.Resource
@@ -30,6 +32,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
     private lateinit var recyclerView: RecyclerView
     private lateinit var placesViewModel: PlacesViewModel
     private lateinit var searchAdapter: SearchAdapter
+    private var location: String = LOCATION_KYIV_CENTER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,28 +48,29 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         getData()
     }
 
-    private fun getData(query: String = ""){
-        placesViewModel.getPlaces(category = getCategory(), query = query).observe(this, Observer {
-            when (it.status) {
-                Resource.Status.SUCCESS -> {
-                    progressBar.visibility = View.GONE
-                    when {
-                        it.data == null || it.data.isEmpty() -> showErrorToast()
-                        else -> {
-                            places = it.data
-                            searchAdapter.setPlaces(it.data)
+    private fun getData(query: String = "") {
+        placesViewModel.getPlaces(category = getCategory(), query = query, coordinates = location)
+            .observe(this, Observer {
+                when (it.status) {
+                    Resource.Status.SUCCESS -> {
+                        progressBar.visibility = View.GONE
+                        when {
+                            it.data == null || it.data.isEmpty() -> showErrorToast()
+                            else -> {
+                                places = it.data
+                                searchAdapter.setPlaces(it.data.sortedBy { placeItem -> placeItem.distance })
+                            }
                         }
                     }
+                    Resource.Status.LOADING -> {
+                        progressBar.visibility = View.VISIBLE
+                    }
+                    Resource.Status.ERROR -> {
+                        progressBar.visibility = View.GONE
+                        showErrorToast()
+                    }
                 }
-                Resource.Status.LOADING -> {
-                    progressBar.visibility = View.VISIBLE
-                }
-                Resource.Status.ERROR -> {
-                    progressBar.visibility = View.GONE
-                    showErrorToast()
-                }
-            }
-        })
+            })
     }
 
     private fun setupRecycler() {
@@ -82,6 +86,9 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         progressBar = findViewById(R.id.progressBar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = intent.getStringExtra(CATEGORY)
+        intent.getStringExtra(LOCATION)?.let{
+            location = it
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -113,12 +120,12 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         val searchView = searchItem?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                getData(query?.toLowerCase()?:"")
+                getData(query?.toLowerCase() ?: "")
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                getData(newText?.toLowerCase()?:"")
+                getData(newText?.toLowerCase() ?: "")
                 return true
             }
         })
@@ -126,7 +133,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
     }
 
     override fun onItemClick(itemPosition: Int) {
-       //TODO (go to detailed activity)
+        //TODO (go to detailed activity)
         Log.e(TAG, "Item clicked $itemPosition")
     }
 

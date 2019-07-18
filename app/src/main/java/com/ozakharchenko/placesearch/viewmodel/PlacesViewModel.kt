@@ -6,15 +6,14 @@ import com.ozakharchenko.placesearch.AppExecutors
 import com.ozakharchenko.placesearch.repository.PlaceItem
 import com.ozakharchenko.placesearch.repository.PlacesRepo
 import com.ozakharchenko.placesearch.usecases.GetPlacesList
-import com.ozakharchenko.placesearch.utils.COORDINATE_KYIV_CENTER
 import com.ozakharchenko.placesearch.utils.SearchCategory
 
 class PlacesViewModel : ViewModel() {
 
     fun getPlaces(
             category: SearchCategory,
-            coordinates: String = COORDINATE_KYIV_CENTER,
-            query: String = "",
+            coordinates: String,
+            query: String,
             radius: Int = 10_000,
             limit: Int = 50
     ): LiveData<Resource<List<PlaceItem>>> {
