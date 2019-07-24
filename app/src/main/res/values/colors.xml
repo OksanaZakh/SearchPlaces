@@ -4,9 +4,9 @@
     <!--<color name="colorPrimaryDark">#bf5f82</color>-->
     <!--<color name="colorAccent">#ffc1e3</color>-->
 
-    <color name="colorPrimary">#ba68c8</color>
-    <color name="colorPrimaryDark">#883997</color>
-    <color name="colorAccent">#ee98fb</color>
+    <color name="colorPrimary">#00b8d4</color>
+    <color name="colorPrimaryDark">#0088a3</color>
+    <color name="colorAccent">#62ebff</color>
     <color name="colorWhite">#ffffff</color>
     <color name="font_gray">#BBBABC</color>
 </resources>

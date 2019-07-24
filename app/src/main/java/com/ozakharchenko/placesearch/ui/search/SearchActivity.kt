@@ -1,64 +1,68 @@
 package com.ozakharchenko.placesearch.ui.search
 
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.SearchView
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.LocationServices
 import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.repository.PlaceItem
+import com.ozakharchenko.placesearch.ui.BaseLocationActivity
 import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
 import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
+import com.ozakharchenko.placesearch.ui.listeners.OnLocationChangedListener
 import com.ozakharchenko.placesearch.utils.CATEGORY
-import com.ozakharchenko.placesearch.utils.LOCATION
-import com.ozakharchenko.placesearch.utils.LOCATION_KYIV_CENTER
 import com.ozakharchenko.placesearch.utils.SearchCategory
 import com.ozakharchenko.placesearch.viewmodel.PlacesViewModel
 import com.ozakharchenko.placesearch.viewmodel.Resource
 
-class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavouriteListener {
-
-    val TAG = "SEARCH ACTIVITY"
+class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavouriteListener {
 
     private var places: List<PlaceItem> = ArrayList()
     private lateinit var progressBar: ProgressBar
     private lateinit var recyclerView: RecyclerView
     private lateinit var placesViewModel: PlacesViewModel
     private lateinit var searchAdapter: SearchAdapter
-    private var location: String = LOCATION_KYIV_CENTER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
-
         setupView()
         setupRecycler()
+    }
+
+    override fun onStart() {
+        super.onStart()
         setupViewModel()
     }
 
     private fun setupViewModel() {
         placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
-        getData()
+        getData(query, location)
     }
 
-    private fun getData(query: String = "") {
-        placesViewModel.getPlaces(category = getCategory(), query = query, coordinates = location)
+    override fun getData(query: String, location: String?) {
+        Log.e(TAG, "Actual loc is 1 $location")
+        placesViewModel.getPlaces(category = getCategory(), query = query, coordinates = location ?: defaultLocation)
             .observe(this, Observer {
                 when (it.status) {
                     Resource.Status.SUCCESS -> {
                         progressBar.visibility = View.GONE
                         when {
-                            it.data == null || it.data.isEmpty() -> showErrorToast()
+                            it.data == null || it.data.isEmpty() -> makeToast(getString(R.string.download_error))
                             else -> {
                                 places = it.data
-                                searchAdapter.setPlaces(it.data.sortedBy { placeItem -> placeItem.distance })
+                                searchAdapter.setPlaces(places.sortedBy { placeItem -> placeItem.distance })
+                                searchAdapter.notifyDataSetChanged()
                             }
                         }
                     }
@@ -67,7 +71,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
                     }
                     Resource.Status.ERROR -> {
                         progressBar.visibility = View.GONE
-                        showErrorToast()
+                        makeToast(getString(R.string.download_error))
                     }
                 }
             })
@@ -84,11 +88,11 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
     private fun setupView() {
         recyclerView = findViewById(R.id.rvList)
         progressBar = findViewById(R.id.progressBar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = intent.getStringExtra(CATEGORY)
-        intent.getStringExtra(LOCATION)?.let{
-            location = it
+        supportActionBar?.run {
+            setDisplayHomeAsUpEnabled(true)
+            title = intent.getStringExtra(CATEGORY)
         }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -142,5 +146,16 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener, OnAddToFavourit
         Log.e(TAG, "Item added to db $itemPosition")
     }
 
-    private fun showErrorToast() = Toast.makeText(this, R.string.download_error, Toast.LENGTH_LONG).show()
+
+    override fun getLocation(onLocationChangedListener: OnLocationChangedListener) {
+        if (checkSelfPermission(ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            with(LocationServices.getFusedLocationProviderClient(this)){lastLocation.addOnSuccessListener {
+                if (it != null) {
+                    onLocationChangedListener.onLocationChanged(it.latitude.toString() + "," + it.longitude.toString())
+                }}
+            }
+        }
+    }
 }
