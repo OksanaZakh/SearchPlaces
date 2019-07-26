@@ -7,21 +7,25 @@ import com.ozakharchenko.placesearch.api.Venue
 import com.ozakharchenko.placesearch.utils.SearchCategory
 import com.ozakharchenko.placesearch.viewmodel.Resource
 
-class FetchPlacesFromAPITask constructor(private val apiService: APIService,
-                                         private val category: SearchCategory,
-                                         private val coordinates: String,
-                                         private val query: String,
-                                         private val radius: Int,
-                                         private val limit: Int) : Runnable {
+class FetchPlacesFromAPITask constructor(
+    private val apiService: APIService,
+    private val category: SearchCategory,
+    private val coordinates: String,
+    private val query: String,
+    private val radius: Int,
+    private val limit: Int
+) : Runnable {
     private val _liveData = MutableLiveData<Resource<List<PlaceItem>>>().apply { value = Resource.loading(null) }
     val liveData = _liveData
 
     override fun run() {
         val response = apiService.getNearByPlaces(category.category, coordinates, query, radius, limit).execute()
         if (response.isSuccessful) {
-            _liveData.postValue(Resource.success(response.body()?.let {
+
+            val data = Resource.success(response.body()?.let {
                 getPlaceItemsFromResponse(it)
-            }))
+            })
+            _liveData.postValue(data)
         } else {
             val msg = response.errorBody()?.string()
             val errorMsg = if (msg.isNullOrEmpty()) {
@@ -37,10 +41,10 @@ class FetchPlacesFromAPITask constructor(private val apiService: APIService,
         val places = ArrayList<PlaceItem>()
         input.response.venues?.forEach {
             places.add(
-                    PlaceItem(
-                            it.id, it.name, it.location?.formattedAddress?.joinToString(), it.location?.lat, it.location?.lng,
-                            it.location?.distance, it.categories?.get(0)?.name, parseUrl(it) ?: ""
-                    )
+                PlaceItem(
+                    it.id, it.name, it.location?.formattedAddress?.joinToString(), it.location?.lat, it.location?.lng,
+                    it.location?.distance, it.categories?.get(0)?.name, parseUrl(it) ?: ""
+                )
             )
         }
         return places

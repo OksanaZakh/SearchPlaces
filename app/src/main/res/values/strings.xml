@@ -14,4 +14,10 @@
     <string name="download_error">Something goes wrong, please check internet connection or try later!</string>
     <string name="category">Category:</string>
     <string name="distance">Distance, meters:</string>
+    <string name="permission_request">Please grant the location permissions!</string>
+    <string name="denied_permission_info">Location permissions are denied :(
+        Kyiv center is chosen as your default location.</string>
+    <string name="gps_unavailable_info">GPS is unavailable:(
+        Kyiv center is chosen as your default location.
+        You can enable GPS any time by pressing location button.</string>
 </resources>

@@ -9,18 +9,19 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.util.Log
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
+import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.ui.listeners.OnGpsListener
 import com.ozakharchenko.placesearch.ui.listeners.OnLocationChangedListener
+import com.ozakharchenko.placesearch.utils.ERROR_MESSAGE
 import com.ozakharchenko.placesearch.utils.LOCATION_KYIV_CENTER
 
 
@@ -35,7 +36,6 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
     protected var location: String? = null
     protected var isGps = false
     protected var isPermission = false
-
     private val permissions: Array<String>
     protected var onGpsListener: OnGpsListener
     protected var onLocationChangedListener: OnLocationChangedListener
@@ -51,19 +51,19 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
         onGpsListener = object : OnGpsListener {
             override fun gpsStatus(isGPSEnable: Boolean) {
                 isGps = isGPSEnable
-                if (isGps) getLocation(onLocationChangedListener)
+                when (isGps) {
+                    true -> getLocation(onLocationChangedListener)
+                    false -> onLocationChangedListener.onLocationChanged(defaultLocation)
+                }
             }
         }
 
         permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         checkLocationPermissionAndGps()
-        Log.e(TAG, "On Start location 1 $location")
-        location = location ?: defaultLocation
-        Log.e(TAG, "On Start location 2 $location")
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -76,7 +76,7 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
         if (!EasyPermissions.hasPermissions(this, *permissions)) {
             EasyPermissions.requestPermissions(
                 this,
-                "Please grant the location permissions!",
+                getString(R.string.permission_request),
                 PERMISSION_REQUEST_CODE,
                 *permissions
             )
@@ -88,16 +88,12 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
         onGpsListener.gpsStatus(false)
         isPermission = false
-        makeToast("Location permissions are denied :(\nKyiv center is chosen as your default location.")
+        makeToast(getString(R.string.denied_permission_info))
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         isPermission = true
         turnGpsOn(onGpsListener)
-    }
-
-    fun makeToast(text: String) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -108,17 +104,11 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
             }
         } else {
             onGpsListener.gpsStatus(false)
-            makeToast("GPS is unavailable:(\nKyiv center is chosen as your default location.\nYou can enable GPS any time by pressing location button.")
+            makeToast(getString(R.string.gps_unavailable_info))
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        checkLocationPermissionAndGps()
-    }
-
     private fun turnGpsOn(onGpsListener: OnGpsListener?) {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val mSettingsClient = LocationServices.getSettingsClient(this)
 
         val locationRequest = LocationRequest.create().apply {
@@ -129,9 +119,8 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val mLocationSettingsRequest = builder.build()
         builder.setAlwaysShow(true)
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if ((getSystemService(Context.LOCATION_SERVICE) as LocationManager).isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             onGpsListener?.gpsStatus(true)
-
         } else {
             mSettingsClient
                 .checkLocationSettings(mLocationSettingsRequest)
@@ -139,21 +128,15 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
                     onGpsListener?.gpsStatus(true)
                 }
                 .addOnFailureListener(this) { e ->
-                    val statusCode = (e as ApiException).statusCode
-                    when (statusCode) {
+                    when ((e as ApiException).statusCode) {
                         LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
                             try {
                                 val rae = e as ResolvableApiException
                                 rae.startResolutionForResult(this, GPS_REQUEST_CODE)
                             } catch (sie: IntentSender.SendIntentException) {
-                                Log.e(TAG, "PendingIntent unable to execute request.")
                             }
-
                         LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                            val errorMessage =
-                                "Location settings are inadequate, and cannot be " + "fixed here. Fix in Settings."
-                            Log.e(TAG, errorMessage)
-
+                            val errorMessage = ERROR_MESSAGE
                             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                         }
                     }
@@ -161,7 +144,22 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
         }
     }
 
-    abstract fun getLocation(onLocationChangedListener: OnLocationChangedListener)
+    fun getLocation(onLocationChangedListener: OnLocationChangedListener) {
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ) {
+            with(LocationServices.getFusedLocationProviderClient(this)){lastLocation.addOnSuccessListener {
+                if (it != null) {
+                    onLocationChangedListener.onLocationChanged(it.latitude.toString() + "," + it.longitude.toString())
+                }}
+            }
+        }
+    }
 
-    abstract fun getData(query: String, location: String? = defaultLocation)
+
+    fun makeToast(text: String) {
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
+    }
+
+    abstract fun getData(query: String, location: String?)
 }

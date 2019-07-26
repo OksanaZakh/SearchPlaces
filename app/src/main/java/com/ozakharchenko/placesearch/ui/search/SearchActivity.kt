@@ -1,8 +1,5 @@
 package com.ozakharchenko.placesearch.ui.search
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,15 +10,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.LocationServices
 import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.repository.PlaceItem
 import com.ozakharchenko.placesearch.ui.BaseLocationActivity
 import com.ozakharchenko.placesearch.ui.listeners.OnAddToFavouriteListener
 import com.ozakharchenko.placesearch.ui.listeners.OnItemClickListener
-import com.ozakharchenko.placesearch.ui.listeners.OnLocationChangedListener
 import com.ozakharchenko.placesearch.utils.CATEGORY
-import com.ozakharchenko.placesearch.utils.SearchCategory
+import com.ozakharchenko.placesearch.utils.getCategory
 import com.ozakharchenko.placesearch.viewmodel.PlacesViewModel
 import com.ozakharchenko.placesearch.viewmodel.Resource
 
@@ -36,23 +31,17 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
+        placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
         setupView()
         setupRecycler()
     }
 
-    override fun onStart() {
-        super.onStart()
-        setupViewModel()
-    }
-
-    private fun setupViewModel() {
-        placesViewModel = ViewModelProviders.of(this).get(PlacesViewModel::class.java)
-        getData(query, location)
-    }
-
     override fun getData(query: String, location: String?) {
-        Log.e(TAG, "Actual loc is 1 $location")
-        placesViewModel.getPlaces(category = getCategory(), query = query, coordinates = location ?: defaultLocation)
+        placesViewModel.getPlaces(
+            category = getCategory(intent.getStringExtra(CATEGORY)),
+            query = query,
+            coordinates = location ?: defaultLocation
+        )
             .observe(this, Observer {
                 when (it.status) {
                     Resource.Status.SUCCESS -> {
@@ -100,36 +89,18 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
         return true
     }
 
-    private fun getCategory(): SearchCategory {
-        val category: SearchCategory by lazy {
-            when (intent.getStringExtra(CATEGORY)) {
-                getString(R.string.entertainment) -> SearchCategory.ENTERTAINMENT
-                getString(R.string.art) -> SearchCategory.ART
-                getString(R.string.cafes_and_restaurants) -> SearchCategory.FOOD
-                getString(R.string.sightseeing) -> SearchCategory.SIGHTSEEING
-                getString(R.string.educational) -> SearchCategory.EDUCATIONAL
-                getString(R.string.events) -> SearchCategory.EVENTS
-                getString(R.string.government) -> SearchCategory.GOVERNMENT
-                getString(R.string.medical) -> SearchCategory.MEDICAL
-                getString(R.string.public_transport) -> SearchCategory.TRANSPORT
-                else -> SearchCategory.SHOPPING
-            }
-        }
-        return category
-    }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.search, menu)
         val searchItem = menu?.findItem(R.id.action_search)
         val searchView = searchItem?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                getData(query?.toLowerCase() ?: "")
+                getData(query?.toLowerCase() ?: "", location)
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                getData(newText?.toLowerCase() ?: "")
+                getData(newText?.toLowerCase() ?: "", location)
                 return true
             }
         })
@@ -144,18 +115,5 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
     override fun onAddToFavourite(itemPosition: Int) {
         //TODO (add to DB)
         Log.e(TAG, "Item added to db $itemPosition")
-    }
-
-
-    override fun getLocation(onLocationChangedListener: OnLocationChangedListener) {
-        if (checkSelfPermission(ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        ) {
-            with(LocationServices.getFusedLocationProviderClient(this)){lastLocation.addOnSuccessListener {
-                if (it != null) {
-                    onLocationChangedListener.onLocationChanged(it.latitude.toString() + "," + it.longitude.toString())
-                }}
-            }
-        }
     }
 }
