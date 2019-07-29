@@ -18,6 +18,9 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.ozakharchenko.placesearch.R
 import com.ozakharchenko.placesearch.ui.listeners.OnGpsListener
 import com.ozakharchenko.placesearch.ui.listeners.OnLocationChangedListener
@@ -28,7 +31,7 @@ import com.ozakharchenko.placesearch.utils.LOCATION_KYIV_CENTER
 const val PERMISSION_REQUEST_CODE = 1000
 const val GPS_REQUEST_CODE = 1001
 
-abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
+abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks/*, LocationListener*/ {
 
     val TAG = "Base Location Activity"
     protected var query = ""
@@ -39,6 +42,8 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
     private val permissions: Array<String>
     protected var onGpsListener: OnGpsListener
     protected var onLocationChangedListener: OnLocationChangedListener
+    private val locationRequest: LocationRequest
+    private lateinit var locationApiClient: FusedLocationProviderClient
 
     init {
         onLocationChangedListener = object : OnLocationChangedListener {
@@ -57,8 +62,14 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
                 }
             }
         }
+        locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = (10 * 1000).toLong()
+            fastestInterval = (2 * 1000).toLong()
+        }
 
         permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,10 +86,10 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
     fun checkLocationPermissionAndGps() {
         if (!EasyPermissions.hasPermissions(this, *permissions)) {
             EasyPermissions.requestPermissions(
-                this,
-                getString(R.string.permission_request),
-                PERMISSION_REQUEST_CODE,
-                *permissions
+                    this,
+                    getString(R.string.permission_request),
+                    PERMISSION_REQUEST_CODE,
+                    *permissions
             )
         } else {
             turnGpsOn(onGpsListener)
@@ -110,12 +121,6 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
 
     private fun turnGpsOn(onGpsListener: OnGpsListener?) {
         val mSettingsClient = LocationServices.getSettingsClient(this)
-
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = (10 * 1000).toLong()
-            fastestInterval = (2 * 1000).toLong()
-        }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
         val mLocationSettingsRequest = builder.build()
         builder.setAlwaysShow(true)
@@ -123,39 +128,67 @@ abstract class BaseLocationActivity : AppCompatActivity(), EasyPermissions.Permi
             onGpsListener?.gpsStatus(true)
         } else {
             mSettingsClient
-                .checkLocationSettings(mLocationSettingsRequest)
-                .addOnSuccessListener(this) {
-                    onGpsListener?.gpsStatus(true)
-                }
-                .addOnFailureListener(this) { e ->
-                    when ((e as ApiException).statusCode) {
-                        LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
-                            try {
-                                val rae = e as ResolvableApiException
-                                rae.startResolutionForResult(this, GPS_REQUEST_CODE)
-                            } catch (sie: IntentSender.SendIntentException) {
+                    .checkLocationSettings(mLocationSettingsRequest)
+                    .addOnSuccessListener(this) {
+                        onGpsListener?.gpsStatus(true)
+                    }
+                    .addOnFailureListener(this) { e ->
+                        when ((e as ApiException).statusCode) {
+                            LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
+                                try {
+                                    val rae = e as ResolvableApiException
+                                    rae.startResolutionForResult(this, GPS_REQUEST_CODE)
+                                } catch (sie: IntentSender.SendIntentException) {
+                                }
+                            LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                                val errorMessage = ERROR_MESSAGE
+                                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                             }
-                        LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                            val errorMessage = ERROR_MESSAGE
-                            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
                         }
                     }
-                }
         }
     }
 
     fun getLocation(onLocationChangedListener: OnLocationChangedListener) {
         if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
-            with(LocationServices.getFusedLocationProviderClient(this)){lastLocation.addOnSuccessListener {
-                if (it != null) {
-                    onLocationChangedListener.onLocationChanged(it.latitude.toString() + "," + it.longitude.toString())
-                }}
+            locationApiClient = LocationServices.getFusedLocationProviderClient(this)
+            with(locationApiClient) {
+                lastLocation.addOnSuccessListener { location ->
+                    if (location == null || location.accuracy > 100) {
+                        requestLocationUpdates()
+                    } else {
+                        onLocationChangedListener.onLocationChanged(location.latitude.toString() + "," + location.longitude.toString())
+                    }
+                }
             }
         }
     }
 
+
+    protected fun updateLocation(): Boolean {
+        checkLocationPermissionAndGps()
+        if(isGps && isPermission){
+            requestLocationUpdates()
+        }
+        return true
+    }
+
+    @Throws(SecurityException::class)
+    fun requestLocationUpdates() {
+        val mLocationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                if (locationResult != null && locationResult.locations.isNotEmpty()) {
+                    val newLocation = locationResult.locations[0]
+                    onLocationChangedListener.onLocationChanged(newLocation.latitude.toString() + "," + newLocation.longitude.toString())
+                } else {
+                    onLocationChangedListener.onLocationChanged(defaultLocation)
+                }
+            }
+        }
+        locationApiClient.requestLocationUpdates(locationRequest, mLocationCallback, null)
+    }
 
     fun makeToast(text: String) {
         Toast.makeText(this, text, Toast.LENGTH_LONG).show()

@@ -1,11 +1,16 @@
 package com.ozakharchenko.placesearch.ui.search
 
+import android.app.SearchManager
+import android.content.ComponentName
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,6 +32,7 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
     private lateinit var recyclerView: RecyclerView
     private lateinit var placesViewModel: PlacesViewModel
     private lateinit var searchAdapter: SearchAdapter
+    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,11 +83,12 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
     private fun setupView() {
         recyclerView = findViewById(R.id.rvList)
         progressBar = findViewById(R.id.progressBar)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
         supportActionBar?.run {
             setDisplayHomeAsUpEnabled(true)
             title = intent.getStringExtra(CATEGORY)
         }
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -90,9 +97,11 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.search, menu)
+        menuInflater.inflate(R.menu.action_bar_menu, menu)
         val searchItem = menu?.findItem(R.id.action_search)
         val searchView = searchItem?.actionView as SearchView
+        searchView.setSearchableInfo((getSystemService(Context.SEARCH_SERVICE) as SearchManager)
+                .getSearchableInfo(ComponentName(this, SearchActivity::class.java)))
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 getData(query?.toLowerCase() ?: "", location)
@@ -104,6 +113,7 @@ class SearchActivity : BaseLocationActivity(), OnItemClickListener, OnAddToFavou
                 return true
             }
         })
+        menu.findItem(R.id.action_location).setOnMenuItemClickListener { updateLocation() }
         return super.onCreateOptionsMenu(menu)
     }
 

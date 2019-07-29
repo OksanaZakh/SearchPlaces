@@ -35,7 +35,7 @@
                 <com.ozakharchenko.placesearch.utils.CategoryCustomLayout
                     style="@style/CategoryLayoutStyle"
                     android:onClick="goToCategory"
-                    app:category_name="@string/cafes_and_restaurants"
+                    app:category_name="@string/food"
                     app:img_src="@mipmap/ic_food_foreground" />
 
                 <com.ozakharchenko.placesearch.utils.CategoryCustomLayout

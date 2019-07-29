@@ -1,23 +1,25 @@
 <resources>
     <string name="app_name">Place Search</string>
-    <string name="hint">Search the place</string>
-    <string name="entertainment">Entertainments</string>
+    <string name="hint">Search</string>
+    <string name="entertainment">Fun and Rest</string>
     <string name="art">Art</string>
-    <string name="cafes_and_restaurants">Cafes and Restaurants</string>
+    <string name="food">Food</string>
     <string name="sightseeing">Sightseeing</string>
     <string name="educational">Educational</string>
     <string name="events">Events</string>
-    <string name="government">Government buildings</string>
+    <string name="government">Government</string>
     <string name="medical">Medical</string>
-    <string name="shopping">Shopping and services</string>
-    <string name="public_transport">Public transport</string>
+    <string name="shopping">Shopping</string>
+    <string name="public_transport">Transport</string>
     <string name="download_error">Something goes wrong, please check internet connection or try later!</string>
     <string name="category">Category:</string>
     <string name="distance">Distance, meters:</string>
     <string name="permission_request">Please grant the location permissions!</string>
-    <string name="denied_permission_info">Location permissions are denied :(
+    <string name="denied_permission_info">Location permissions are temporally denied :(
         Kyiv center is chosen as your default location.</string>
     <string name="gps_unavailable_info">GPS is unavailable:(
         Kyiv center is chosen as your default location.
         You can enable GPS any time by pressing location button.</string>
+    <string name="action_update">Update</string>
+    <string name="action_get_location">Get Location</string>
 </resources>

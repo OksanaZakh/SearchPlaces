@@ -16,18 +16,19 @@ enum class SearchCategory(var category: String){
     TRANSPORT("4d4b7105d754a06379d81259")
 }
 
+//TODO: make this code cleaner
 fun getCategory(str: String): SearchCategory {
     val category: SearchCategory by lazy {
         when (str) {
-            "Entertainments" -> SearchCategory.ENTERTAINMENT
+            "Fun and Rest" -> SearchCategory.ENTERTAINMENT
             "Art" -> SearchCategory.ART
-            "Cafes and Restaurants" -> SearchCategory.FOOD
+            "Food" -> SearchCategory.FOOD
             "Sightseeing" -> SearchCategory.SIGHTSEEING
             "Educational" -> SearchCategory.EDUCATIONAL
             "Events" -> SearchCategory.EVENTS
-            "Government buildings" -> SearchCategory.GOVERNMENT
+            "Government" -> SearchCategory.GOVERNMENT
             "Medical" -> SearchCategory.MEDICAL
-            "Public transport" -> SearchCategory.TRANSPORT
+            "Transport" -> SearchCategory.TRANSPORT
             else -> SearchCategory.SHOPPING
         }
     }
